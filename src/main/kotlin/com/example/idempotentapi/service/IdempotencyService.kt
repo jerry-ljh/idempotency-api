@@ -39,6 +39,10 @@ class IdempotencyService(
             .setIfAbsent("$IDEMPOTENCY_REQUEST:${key}", IDEMPOTENCY_REQUEST, Duration.ofMinutes(5))
     }
 
+    fun getIdempotencyRequest(key: IdempotencyKey): String? {
+        return redisTemplate.opsForValue().get("$IDEMPOTENCY_REQUEST:${key}")
+    }
+
     fun evictIdempotencyRequest(key: IdempotencyKey): Boolean? {
         return redisTemplate.delete("$IDEMPOTENCY_REQUEST:${key}")
     }
