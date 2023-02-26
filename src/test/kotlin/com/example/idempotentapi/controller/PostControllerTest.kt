@@ -9,9 +9,11 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.ninjasquad.springmockk.SpykBean
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
+import io.mockk.every
 import io.mockk.verify
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
@@ -23,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.web.util.NestedServletException
 import java.util.concurrent.CompletableFuture
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -83,7 +86,6 @@ class PostControllerTest {
         val key = IdempotencyKey(key = idempotencyHeader, httpMethod = HttpMethod.POST, uri = "/post")
         idempotencyService.getIdempotencyRequest(key) shouldBe null
         idempotencyService.getIdempotencyResult(key) shouldNotBe null
-
     }
 
     @Test
@@ -165,5 +167,25 @@ class PostControllerTest {
         secondRequest.join()
 
         verify(exactly = 1) { postService.createPost(body) }
+    }
+
+    @Test
+    fun `게시글 생성 - 멱등성 요청 처리에 실패하더라도 처리중 플래그는 제거된다`() {
+        // given
+        val body = CreatePostRequest(userId = 1, contents = "test")
+        val idempotencyHeader = System.currentTimeMillis().toString()
+        every { postService.createPost(body) } throws RuntimeException("게시글 등록 실패")
+        assertThrows<NestedServletException> {
+            mockMvc.perform(
+                post("/post")
+                    .content(objectMapper.writeValueAsString(body))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .header(HTTP_HEADER_IDEMPOTENCY_KEY, idempotencyHeader)
+                    .characterEncoding(Charsets.UTF_8)
+            )
+        }
+        val key = IdempotencyKey(key = idempotencyHeader, httpMethod = HttpMethod.POST, uri = "/post")
+        idempotencyService.getIdempotencyRequest(key) shouldBe null
     }
 }

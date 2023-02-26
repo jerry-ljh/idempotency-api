@@ -42,6 +42,17 @@ class IdempotencyInterceptor(
             val key = request.getIdempotencyKey()
             val responseBody = String((response as ContentCachingResponseWrapper).contentAsByteArray)
             idempotencyService.setIdempotencyResult(key, responseBody)
+        }
+    }
+
+    override fun afterCompletion(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any,
+        ex: Exception?
+    ) {
+        if (isIdempotencyRequest(request, handler as HandlerMethod)) {
+            val key = request.getIdempotencyKey()
             idempotencyService.evictIdempotencyRequest(key)
         }
     }
