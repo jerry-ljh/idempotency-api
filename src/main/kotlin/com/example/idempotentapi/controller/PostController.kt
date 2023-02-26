@@ -2,6 +2,7 @@ package com.example.idempotentapi.controller
 
 import com.example.idempotentapi.controller.dto.CreatePostRequest
 import com.example.idempotentapi.service.PostService
+import com.example.idempotentapi.util.IdempotencyApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -12,6 +13,7 @@ class PostController(
     private val postService: PostService
 ) {
 
+    @IdempotencyApi
     @PostMapping("/post")
     fun createPost(
         @RequestBody body: CreatePostRequest
