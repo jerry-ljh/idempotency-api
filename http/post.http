@@ -1,7 +1,0 @@
-### 게시글 작성
-POST http://localhost:8080/post
-Content-Type: application/json
-
-{
-  "contents": "제리의 개발 꿀팁을 소개합니다!"
-}
