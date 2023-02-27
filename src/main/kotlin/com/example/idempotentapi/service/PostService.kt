@@ -1,6 +1,7 @@
 package com.example.idempotentapi.service
 
 import com.example.idempotentapi.controller.dto.CreatePostRequest
+import com.example.idempotentapi.controller.dto.PatchPostRequest
 import com.example.idempotentapi.domain.Post
 import com.example.idempotentapi.repository.PostJpaRepository
 import org.slf4j.LoggerFactory
@@ -18,5 +19,9 @@ class PostService(
         postRepository.save(postEntity)
         Thread.sleep(1000)
         log.info("게시글이 포스팅 content: ${postEntity.contents}")
+    }
+
+    fun updatePost(postRequest: PatchPostRequest) {
+        log.info("게시글이 포스팅 수정 content: $postRequest")
     }
 }

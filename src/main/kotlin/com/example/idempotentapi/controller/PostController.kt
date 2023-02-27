@@ -14,21 +14,17 @@ import org.springframework.web.bind.annotation.RestController
 class PostController(
     private val postService: PostService
 ) {
-
     @IdempotencyApi
     @PostMapping("/post")
-    fun createPost(
-        @RequestBody body: CreatePostRequest
-    ): ResponseEntity<String> {
+    fun createPost(@RequestBody body: CreatePostRequest): ResponseEntity<String> {
         postService.createPost(body)
         return ResponseEntity.ok().body("게시글 생성 성공")
     }
 
     @IdempotencyApi(usePayloadValidation = true)
     @PatchMapping("/post")
-    fun patchPost(
-        @RequestBody body: PatchPostRequest
-    ): ResponseEntity<String> {
+    fun patchPost(@RequestBody body: PatchPostRequest): ResponseEntity<String> {
+        postService.updatePost(body)
         return ResponseEntity.ok().body("게시글 수정 성공")
     }
 }
