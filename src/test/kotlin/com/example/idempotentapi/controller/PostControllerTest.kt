@@ -96,6 +96,22 @@ class PostControllerTest {
     }
 
     @Test
+    fun `게시글 생성 - 멱등성 요청 처리에 실패한 경우 다시 요청을 받아 처리할 수 있다`() {
+        // given
+        val body = CreatePostRequest(userId = 1, contents = "test")
+        val idempotencyHeader = System.currentTimeMillis().toString()
+        every { postService.createPost(body) } throws RuntimeException("게시글 등록 실패") andThen Unit
+        assertThrows<NestedServletException> { mockMvc.perform(post("/post", body, idempotencyHeader)) }
+        // when
+        val result = mockMvc.perform(post("/post", body, idempotencyHeader)).andExpect(status().isOk).andReturn()
+        // then
+        val savedIdempotencyResponse = idempotencyService.getIdempotencyResponse(result.request.getIdempotencyKey())
+        val responseBody = result.response.contentAsString
+        savedIdempotencyResponse shouldBe responseBody
+    }
+
+
+    @Test
     fun `게시글 생성 - 멱등키가 잘못된 경우 400(BAD_REQUEST)를 응답한다`() {
         // given
         val body = CreatePostRequest(userId = 1, contents = "test")
