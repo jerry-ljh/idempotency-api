@@ -18,7 +18,6 @@ class ContentCacheFilter : Filter {
         val contentCachingRequestWrapper = CustomContentCachedRequestWrapper(request as HttpServletRequest)
         val contentCachingResponseWrapper = ContentCachingResponseWrapper(response as HttpServletResponse)
         chain?.doFilter(contentCachingRequestWrapper, contentCachingResponseWrapper)
-        contentCachingRequestWrapper.characterEncoding = Charsets.UTF_8.name()
         contentCachingResponseWrapper.characterEncoding = Charsets.UTF_8.name()
         contentCachingResponseWrapper.copyBodyToResponse()
     }
