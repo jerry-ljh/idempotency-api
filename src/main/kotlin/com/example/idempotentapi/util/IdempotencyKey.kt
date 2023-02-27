@@ -7,5 +7,10 @@ data class IdempotencyKey(
     val httpMethod: HttpMethod,
     val uri: String,
 ) {
-    var payload: String = ""
+    var payload: String? = null
+
+    init {
+        if (key.isBlank()) throw IdempotencyFormatException("멱등키는 빈 값이 될 수 없습니다.")
+        if (key.length > 32) throw IdempotencyFormatException("멱등키는 최대 32자 이하로 가능합니다. ${key}, length: ${{ key.length }}")
+    }
 }

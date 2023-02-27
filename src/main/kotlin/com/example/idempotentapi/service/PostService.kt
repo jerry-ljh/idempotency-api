@@ -17,7 +17,6 @@ class PostService(
     fun createPost(postRequest: CreatePostRequest) {
         val postEntity = Post(contents = postRequest.contents)
         postRepository.save(postEntity)
-        Thread.sleep(1000)
         log.info("게시글이 포스팅 content: ${postEntity.contents}")
     }
 

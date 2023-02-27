@@ -1,5 +1,7 @@
 package com.example.idempotentapi.configuration
 
+import com.example.idempotentapi.util.IdempotencyKey
+import com.example.idempotentapi.util.getIdempotencyKey
 import org.springframework.stereotype.Component
 import org.springframework.web.util.ContentCachingResponseWrapper
 import java.io.BufferedReader
@@ -25,6 +27,7 @@ class ContentCacheFilter : Filter {
 class CustomContentCachedRequestWrapper(request: HttpServletRequest) : HttpServletRequestWrapper(request) {
 
     val payload: String = request.inputStream.bufferedReader().readText()
+    val idempotencyKey: IdempotencyKey by lazy { getIdempotencyKey() }
 
     override fun getInputStream(): ServletInputStream {
         val byteArrayInputStream = ByteArrayInputStream(payload.toByteArray())
