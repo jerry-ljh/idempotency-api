@@ -10,6 +10,10 @@ fun HandlerMethod.enableIdempotency(): Boolean {
     return this.method.annotations.find { it is IdempotencyApi } != null
 }
 
+fun HandlerMethod.usePayloadValidation(): Boolean {
+    return (this.method.annotations.find { it is IdempotencyApi } as IdempotencyApi?)!!.usePayloadValidation
+}
+
 fun HttpServletRequest.containsIdempotencyHeader(): Boolean {
     return this.getHeader(HTTP_HEADER_IDEMPOTENCY_KEY) != null
 }

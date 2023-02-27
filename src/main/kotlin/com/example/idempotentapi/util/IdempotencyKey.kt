@@ -6,4 +6,6 @@ data class IdempotencyKey(
     val key: String,
     val httpMethod: HttpMethod,
     val uri: String,
-)
+) {
+    var payload: String = ""
+}

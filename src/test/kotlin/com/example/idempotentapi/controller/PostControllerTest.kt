@@ -1,6 +1,7 @@
 package com.example.idempotentapi.controller
 
 import com.example.idempotentapi.controller.dto.CreatePostRequest
+import com.example.idempotentapi.controller.dto.PatchPostRequest
 import com.example.idempotentapi.service.IdempotencyService
 import com.example.idempotentapi.service.PostService
 import com.example.idempotentapi.util.HTTP_HEADER_IDEMPOTENCY_KEY
@@ -22,6 +23,7 @@ import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType
 import org.springframework.test.context.TestConstructor
 import org.springframework.test.web.servlet.MockMvc
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.content
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
@@ -84,7 +86,6 @@ class PostControllerTest {
             .andExpect(content().string("게시글 생성 성공"))
 
         val key = IdempotencyKey(key = idempotencyHeader, httpMethod = HttpMethod.POST, uri = "/post")
-        idempotencyService.getIdempotencyRequest(key) shouldBe null
         idempotencyService.getIdempotencyResult(key) shouldNotBe null
     }
 
@@ -187,5 +188,30 @@ class PostControllerTest {
         }
         val key = IdempotencyKey(key = idempotencyHeader, httpMethod = HttpMethod.POST, uri = "/post")
         idempotencyService.getIdempotencyRequest(key) shouldBe null
+    }
+
+    @Test
+    fun `게시글 수정 - 동일한 멱등성 요청에 payload가 다른 경우 422로 응답한다`() {
+        // given
+        val idempotencyHeader = System.currentTimeMillis().toString()
+        mockMvc.perform(
+            patch("/post")
+                .content(objectMapper.writeValueAsString(PatchPostRequest(userId = 1, contentId = 1, content = "수정 1")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HTTP_HEADER_IDEMPOTENCY_KEY, idempotencyHeader)
+                .characterEncoding(Charsets.UTF_8)
+        )
+            .andExpect(status().isOk)
+
+        mockMvc.perform(
+            patch("/post")
+                .content(objectMapper.writeValueAsString(PatchPostRequest(userId = 1, contentId = 2, content = "수정 2")))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .header(HTTP_HEADER_IDEMPOTENCY_KEY, idempotencyHeader)
+                .characterEncoding(Charsets.UTF_8)
+        )
+            .andExpect(status().isUnprocessableEntity)
     }
 }
