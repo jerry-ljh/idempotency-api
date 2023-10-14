@@ -47,7 +47,7 @@ class IdempotencyAspect(
             parameterNames.indices.forEachIndexed { _, i ->
                 val name = parameterNames[i]
                 val value = joinPoint.args[i]
-                setVariable(name, "[$name=$value]")
+                setVariable(name, value)
             }
         }
         return parser.parseExpression(expression).getValue(context).toString()
