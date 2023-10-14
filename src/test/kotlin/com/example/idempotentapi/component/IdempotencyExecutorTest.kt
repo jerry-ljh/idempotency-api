@@ -102,6 +102,7 @@ class TestService {
     }
 
     fun getNewValue(): Long {
+        sleep(10)
         return System.currentTimeMillis()
     }
 }
