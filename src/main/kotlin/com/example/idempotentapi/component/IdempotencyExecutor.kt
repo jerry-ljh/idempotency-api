@@ -25,25 +25,20 @@ class IdempotencyExecutor(
         }
     }
 
-
     fun execute(key: String, request: () -> Any?): Any? {
         validateKey(key)
         getResult(key)?.let { return it.data }
-        return try {
+        try {
             setExecutingStatus(key)
-            setResult(key, request)
+            val result = request()
+            setResult(key, result)
             deleteExecutingStatus(key)
+            return result
         } catch (e: Exception) {
             if (e is IdempotencyException && e.errorCode == ErrorCode.CONFLICT_REQUEST) throw e
             deleteExecutingStatus(key)
-            return e
+            throw e
         }
-    }
-
-    private fun setResult(key: String, request: () -> Any?): Any? {
-        val result = IdempotencyResult(data = request())
-        setResult(key, result)
-        return result.data
     }
 
     private fun getResult(key: String): IdempotencyResult? {
@@ -52,9 +47,9 @@ class IdempotencyExecutor(
         return result?.let { it as IdempotencyResult }
     }
 
-    private fun setResult(key: String, result: IdempotencyResult) {
+    private fun setResult(key: String, data: Any?) {
         val resultKey = getResultKey(key)
-        redisTemplate.opsForValue().set(resultKey, result, Duration.ofMinutes(1))
+        redisTemplate.opsForValue().set(resultKey, IdempotencyResult(data = data), Duration.ofMinutes(1))
     }
 
     private fun setExecutingStatus(key: String) {

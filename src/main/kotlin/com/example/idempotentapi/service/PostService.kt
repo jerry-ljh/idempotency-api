@@ -22,7 +22,7 @@ class PostService(
     fun createPost(postRequest: CreatePostRequest) {
         val postEntity = Post(userId = postRequest.userId, contents = postRequest.contents)
         postRepository.save(postEntity)
-        sleep(3000)
+        sleep(1000)
         log.info("게시글 포스팅 content: ${postEntity.contents}")
     }
 

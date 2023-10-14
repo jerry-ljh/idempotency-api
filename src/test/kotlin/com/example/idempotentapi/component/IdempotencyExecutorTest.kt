@@ -26,7 +26,7 @@ class IdempotencyExecutorTest(
 ) {
 
     private val TEST_KEY = "test"
-    val service = spyk<TestService>()
+    private val service = spyk<TestService>()
 
     @BeforeEach
     fun clean() {
@@ -92,17 +92,18 @@ class IdempotencyExecutorTest(
         // then
         redisTemplate.hasKey(IdempotencyExecutor.getRequestKey(TEST_KEY)) shouldBe false
     }
+
+    private class TestService {
+
+        private val log = LoggerFactory.getLogger(this::class.simpleName)
+        fun call() {
+            log.info("call")
+        }
+
+        fun getNewValue(): Long {
+            sleep(10)
+            return System.currentTimeMillis()
+        }
+    }
 }
 
-class TestService {
-
-    private val log = LoggerFactory.getLogger(this::class.simpleName)
-    fun call() {
-        log.info("call")
-    }
-
-    fun getNewValue(): Long {
-        sleep(10)
-        return System.currentTimeMillis()
-    }
-}

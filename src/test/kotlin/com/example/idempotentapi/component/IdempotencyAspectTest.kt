@@ -1,8 +1,5 @@
 package com.example.idempotentapi.component
 
-import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY1
-import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY2
-import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY3
 import com.example.idempotentapi.util.ErrorCode
 import com.example.idempotentapi.util.IdempotencyException
 import io.kotest.matchers.shouldBe
@@ -18,13 +15,13 @@ import org.springframework.test.context.TestConstructor
 import java.lang.Thread.sleep
 import java.util.concurrent.CompletableFuture.supplyAsync
 
-@Import(TestService::class)
+@Import(IdempotencyAspectTest.AopTestService::class)
 @TestConstructor(autowireMode = TestConstructor.AutowireMode.ALL)
 @ActiveProfiles("test")
 @SpringBootTest
 class IdempotencyAspectTest(
     private val redisTemplate: RedisTemplate<String, String>,
-    private val service: TestService
+    private val service: AopTestService
 ) {
     companion object {
         const val TEST_KEY1 = "testKey1"
@@ -65,24 +62,24 @@ class IdempotencyAspectTest(
         // then
         redisTemplate.hasKey(IdempotencyExecutor.getRequestKey(TEST_KEY3)) shouldBe false
     }
-}
 
-@Service
-class TestService {
+    @Service
+    class AopTestService {
 
-    @Idempotency(key = TEST_KEY1, expression = "#delay")
-    fun call(delay: Int? = null) {
-        delay?.let { sleep(1000) }
-    }
+        @Idempotency(key = TEST_KEY1, expression = "#delay")
+        fun call(delay: Int? = null) {
+            delay?.let { sleep(1000) }
+        }
 
-    @Idempotency(key = TEST_KEY2)
-    fun callWithException() {
-        throw RuntimeException()
-    }
+        @Idempotency(key = TEST_KEY2)
+        fun callWithException() {
+            throw RuntimeException()
+        }
 
-    @Idempotency(key = TEST_KEY3)
-    fun getNewValue(): Long {
-        sleep(10)
-        return System.currentTimeMillis()
+        @Idempotency(key = TEST_KEY3)
+        fun getNewValue(): Long {
+            sleep(10)
+            return System.currentTimeMillis()
+        }
     }
 }
