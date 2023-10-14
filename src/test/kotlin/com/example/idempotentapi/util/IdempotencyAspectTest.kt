@@ -65,7 +65,7 @@ class IdempotencyAspectTest(
         supplyAsync { service.execute(delay = 1000) }
         sleep(100)
         // when & then
-        assertThrows<IdempotencyConflictException> { service.execute(delay = 1000) }
+        assertThrows<IdempotencyException> { service.execute(delay = 1000) }
     }
 
     @Test

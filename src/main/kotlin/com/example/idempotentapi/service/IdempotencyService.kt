@@ -1,8 +1,8 @@
 package com.example.idempotentapi.service
 
-import com.example.idempotentapi.util.IdempotencyConflictException
+import com.example.idempotentapi.util.ErrorCode
+import com.example.idempotentapi.util.IdempotencyException
 import com.example.idempotentapi.util.IdempotencyKey
-import com.example.idempotentapi.util.IdempotencyPayloadMismatchException
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -18,12 +18,22 @@ class IdempotencyService(
 
     fun validateConflict(idempotencyKey: IdempotencyKey) {
         val isDuplicatedRequest = setIdempotencyRequest(idempotencyKey) == false
-        if (isDuplicatedRequest) throw IdempotencyConflictException("동일한 요청이 처리중입니다.")
+        if (isDuplicatedRequest) throw IdempotencyException(
+            ErrorCode.CONFLICT_REQUEST,
+            "key: $idempotencyKey, 이미 처리중인 요청입니다."
+        )
     }
 
     fun validatePayload(idempotencyKey: IdempotencyKey) {
         val payload = getIdempotencyRequest(idempotencyKey) ?: return
-        if (payload != idempotencyKey.payload) throw IdempotencyPayloadMismatchException("요청의 본문이 기존 내용과 다릅니다.")
+        if (payload != idempotencyKey.payload) throw IdempotencyException(
+            ErrorCode.PAYLOAD_MISMATCH,
+            """
+                요청 payload가 기존과 다릅니다.
+                before: ${payload}
+                input: ${idempotencyKey.payload}
+            """.trimIndent()
+        )
     }
 
     fun setIdempotencyRequest(key: IdempotencyKey): Boolean? {

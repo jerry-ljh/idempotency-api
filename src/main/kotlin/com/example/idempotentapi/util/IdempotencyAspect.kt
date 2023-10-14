@@ -37,7 +37,7 @@ class IdempotencyAspect(
         }
 
         private fun validateKey(key: String) {
-            if (key.isBlank()) throw IdempotencyFormatException("key가 비어있습니다.")
+            if (key.isBlank()) throw IdempotencyException(ErrorCode.INVALID_FORMAT, "key가 비어있습니다.")
         }
     }
 
@@ -75,7 +75,7 @@ class IdempotencyAspect(
         val requestKey = getRequestKey(key)
         val isExecuting = redisTemplate.opsForValue().setIfAbsent(requestKey, "", Duration.ofSeconds(10)) == false
         if (isExecuting) {
-            throw IdempotencyConflictException("이미 처리중인 요청입니다.")
+            throw IdempotencyException(ErrorCode.CONFLICT_REQUEST, "이미 처리중인 요청입니다.")
         }
     }
 
