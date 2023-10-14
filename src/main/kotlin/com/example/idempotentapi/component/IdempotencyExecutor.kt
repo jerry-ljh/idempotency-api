@@ -41,18 +41,24 @@ class IdempotencyExecutor(
         }
     }
 
-    private fun getResult(key: String): IdempotencyResult? {
+    fun getResult(key: String): IdempotencyResult? {
         val resultKey = getResultKey(key)
         val result = redisTemplate.opsForValue().get(resultKey)
         return result?.let { it as IdempotencyResult }
     }
 
-    private fun setResult(key: String, data: Any?) {
+    fun setResult(key: String, data: Any?) {
         val resultKey = getResultKey(key)
         redisTemplate.opsForValue().set(resultKey, IdempotencyResult(data = data), Duration.ofMinutes(1))
     }
 
-    private fun setExecutingStatus(key: String) {
+    fun getExecutingStatus(key: String): String? {
+        val requestKey = getRequestKey(key)
+        val result = redisTemplate.opsForValue().get(requestKey)
+        return result?.let { it as String }
+    }
+
+    fun setExecutingStatus(key: String) {
         val requestKey = getRequestKey(key)
         val isExecuting = redisTemplate.opsForValue().setIfAbsent(requestKey, "", Duration.ofSeconds(10)) == false
         if (isExecuting) {
@@ -60,7 +66,7 @@ class IdempotencyExecutor(
         }
     }
 
-    private fun deleteExecutingStatus(key: String) {
+    fun deleteExecutingStatus(key: String) {
         val requestKey = getRequestKey(key)
         redisTemplate.delete(requestKey)
     }

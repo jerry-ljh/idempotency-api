@@ -1,9 +1,9 @@
 package com.example.idempotentapi.controller
 
+import com.example.idempotentapi.component.IdempotencyApi
 import com.example.idempotentapi.controller.dto.CreatePostRequest
 import com.example.idempotentapi.controller.dto.PatchPostRequest
 import com.example.idempotentapi.service.PostService
-import com.example.idempotentapi.util.IdempotencyApi
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -21,7 +21,7 @@ class PostController(
         return ResponseEntity.ok().body("게시글 생성 성공")
     }
 
-    @IdempotencyApi(usePayloadValidation = true)
+    @IdempotencyApi
     @PatchMapping("/post")
     fun patchPost(@RequestBody body: PatchPostRequest): ResponseEntity<String> {
         postService.updatePost(body)

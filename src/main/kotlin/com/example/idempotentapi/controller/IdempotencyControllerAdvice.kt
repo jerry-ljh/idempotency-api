@@ -15,7 +15,6 @@ class IdempotencyControllerAdvice {
         return when (exception.errorCode) {
             ErrorCode.INVALID_FORMAT -> ResponseEntity.badRequest().body(exception.message)
             ErrorCode.CONFLICT_REQUEST -> ResponseEntity.status(HttpStatus.CONFLICT).body(exception.message)
-            ErrorCode.PAYLOAD_MISMATCH -> ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(exception.message)
         }
     }
 }
