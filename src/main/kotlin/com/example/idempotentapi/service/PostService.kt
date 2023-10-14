@@ -15,7 +15,7 @@ class PostService(
     private val log = LoggerFactory.getLogger(this::class.simpleName)
 
     fun createPost(postRequest: CreatePostRequest) {
-        val postEntity = Post(contents = postRequest.contents)
+        val postEntity = Post(userId = postRequest.userId, contents = postRequest.contents)
         postRepository.save(postEntity)
         log.info("게시글이 포스팅 content: ${postEntity.contents}")
     }
