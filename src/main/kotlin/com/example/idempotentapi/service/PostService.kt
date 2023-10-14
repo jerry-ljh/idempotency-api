@@ -4,7 +4,6 @@ import com.example.idempotentapi.component.Idempotency
 import com.example.idempotentapi.component.IdempotencyExecutor
 import com.example.idempotentapi.configuration.CacheKeys.POST_CREATE_KEY
 import com.example.idempotentapi.controller.dto.CreatePostRequest
-import com.example.idempotentapi.controller.dto.PatchPostRequest
 import com.example.idempotentapi.domain.Post
 import com.example.idempotentapi.repository.PostJpaRepository
 import org.slf4j.LoggerFactory
@@ -34,9 +33,5 @@ class PostService(
     @Idempotency(key = POST_CREATE_KEY, expression = "#postRequest.userId + ',' + #postRequest.contents.hashCode()")
     fun createPostWithIdempotencyAop(postRequest: CreatePostRequest) {
         createPost(postRequest)
-    }
-
-    fun updatePost(postRequest: PatchPostRequest) {
-        log.info("게시글이 포스팅 수정 content: $postRequest")
     }
 }
