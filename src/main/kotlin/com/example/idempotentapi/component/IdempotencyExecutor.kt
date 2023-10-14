@@ -32,8 +32,11 @@ class IdempotencyExecutor(
         return try {
             setExecutingStatus(key)
             setResult(key, request)
-        } finally {
             deleteExecutingStatus(key)
+        } catch (e: Exception) {
+            if (e is IdempotencyException && e.errorCode == ErrorCode.CONFLICT_REQUEST) throw e
+            deleteExecutingStatus(key)
+            return e
         }
     }
 
