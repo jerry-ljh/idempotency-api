@@ -1,5 +1,6 @@
 package com.example.idempotentapi.controller
 
+import com.example.idempotentapi.callAsync
 import com.example.idempotentapi.component.IdempotencyExecutor
 import com.example.idempotentapi.controller.dto.CreatePostRequest
 import com.example.idempotentapi.service.PostService
@@ -7,7 +8,7 @@ import com.example.idempotentapi.util.HTTP_HEADER_IDEMPOTENCY_KEY
 import com.example.idempotentapi.util.IdempotencyKey
 import com.example.idempotentapi.util.getIdempotencyKey
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
-import com.ninjasquad.springmockk.SpykBean
+import com.ninjasquad.springmockk.MockkBean
 import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.shouldNotBe
@@ -34,7 +35,7 @@ class PostControllerTest(
     private val idempotencyExecutor: IdempotencyExecutor,
     private val redisTemplate: RedisTemplate<String, String>,
 ) {
-    @SpykBean
+    @MockkBean(relaxed = true)
     private lateinit var postService: PostService
     private val objectMapper = jacksonObjectMapper()
 
@@ -146,6 +147,18 @@ class PostControllerTest(
         mockMvc.perform(post("/post", body, idempotencyHeader))
             .andExpect(status().isConflict)
             .andReturn()
+    }
+
+    @Test
+    fun `게시글 생성 - 동시 요청 테스트`() {
+        // given
+        val body = CreatePostRequest(userId = 1, contents = "test")
+        val idempotencyHeader = System.currentTimeMillis().toString()
+        every { postService.createPost(any()) } returns Thread.sleep(1000)
+        // when
+        callAsync(thread = 300) { mockMvc.perform(post("/post", body, idempotencyHeader)).andReturn() }
+        // then
+        verify(exactly = 1) { postService.createPost(body) }
     }
 
     private fun post(uri: String, body: Any, idempotencyHeader: String): MockHttpServletRequestBuilder {
