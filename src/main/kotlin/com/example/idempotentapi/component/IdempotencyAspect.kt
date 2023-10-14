@@ -1,6 +1,5 @@
-package com.example.idempotentapi.util
+package com.example.idempotentapi.component
 
-import com.example.idempotentapi.component.IdempotencyExecutor
 import org.aspectj.lang.ProceedingJoinPoint
 import org.aspectj.lang.annotation.Around
 import org.aspectj.lang.annotation.Aspect
@@ -21,7 +20,7 @@ class IdempotencyAspect(
     private val parser = SpelExpressionParser()
     private val keyGenerator = SimpleKeyGenerator()
 
-    @Around("@annotation(Idempotency)")
+    @Around("@annotation(com.example.idempotentapi.component.Idempotency)")
     fun idempotencyProcess(joinPoint: ProceedingJoinPoint): Any? {
         val key = generateKey(joinPoint)
         return idempotencyExecutor.execute(key) {

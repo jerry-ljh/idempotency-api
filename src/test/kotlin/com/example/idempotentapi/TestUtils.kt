@@ -1,4 +1,4 @@
-package com.example.idempotentapi.util
+package com.example.idempotentapi
 
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CompletionException

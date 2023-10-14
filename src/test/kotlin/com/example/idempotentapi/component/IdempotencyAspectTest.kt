@@ -1,9 +1,10 @@
-package com.example.idempotentapi.util
+package com.example.idempotentapi.component
 
-import com.example.idempotentapi.component.IdempotencyExecutor
-import com.example.idempotentapi.util.IdempotencyAspectTest.Companion.TEST_KEY1
-import com.example.idempotentapi.util.IdempotencyAspectTest.Companion.TEST_KEY2
-import com.example.idempotentapi.util.IdempotencyAspectTest.Companion.TEST_KEY3
+import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY1
+import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY2
+import com.example.idempotentapi.component.IdempotencyAspectTest.Companion.TEST_KEY3
+import com.example.idempotentapi.util.ErrorCode
+import com.example.idempotentapi.util.IdempotencyException
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

@@ -1,10 +1,10 @@
 package com.example.idempotentapi.service
 
+import com.example.idempotentapi.callAsync
 import com.example.idempotentapi.controller.dto.CreatePostRequest
 import com.example.idempotentapi.repository.PostJpaRepository
 import com.example.idempotentapi.util.ErrorCode
 import com.example.idempotentapi.util.IdempotencyException
-import com.example.idempotentapi.util.callAsync
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import org.junit.jupiter.api.BeforeEach
